@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: auth
+
+  jwt:
+    secret: testSecretKey
+
+    token:
+      access-expiration-time: 3600000
+      refresh-expiration-time: 86400000
