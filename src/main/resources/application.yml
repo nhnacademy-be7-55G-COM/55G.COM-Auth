@@ -18,3 +18,18 @@ spring:
   cloud:
     config:
       label: main
+
+  rabbitmq:
+    host: ${rabbitmq.host}
+    port: 5672
+    username: guest
+    password: guest
+
+rabbitmq:
+  host: localhost
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,busrefresh
