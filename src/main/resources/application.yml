@@ -18,3 +18,19 @@ spring:
   cloud:
     config:
       label: main
+
+---
+spring:
+  config:
+    activate:
+      on-profile: live
+
+    import: optional:configserver:http://55g-config-live:9000
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+    import: optional:configserver:http://55g-config-dev:9050
