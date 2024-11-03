@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import shop.s5g.auth.filter.CustomLoginFilter;
+import shop.s5g.auth.jwt.JwtProvider;
 
 @Configuration
 @EnableWebSecurity
@@ -20,6 +21,7 @@ import shop.s5g.auth.filter.CustomLoginFilter;
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtProvider jwtProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,9 +42,9 @@ public class SecurityConfig {
             authorizeRequests.anyRequest().permitAll());
 
         CustomLoginFilter customLoginFilter = new CustomLoginFilter(
-            authenticationManager(authenticationConfiguration));
+            authenticationManager(authenticationConfiguration), jwtProvider);
 
-        customLoginFilter.setFilterProcessesUrl("/auth/login");
+        customLoginFilter.setFilterProcessesUrl("/api/auth/login");
 
         http.addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
 
