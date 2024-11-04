@@ -19,6 +19,9 @@ spring:
     config:
       label: main
 
+gateway:
+  url: http://localhost:8000
+
 ---
 spring:
   config:
