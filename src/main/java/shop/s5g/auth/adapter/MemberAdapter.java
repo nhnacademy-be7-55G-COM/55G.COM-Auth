@@ -6,8 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import shop.s5g.auth.dto.LoginResponseDto;
 
-//TODO 추후 유레카 등록 예정
-@FeignClient(name = "member-service", url = "http://localhost:8820")
+@FeignClient(name = "member-service", url = "${gateway.url}")
 public interface MemberAdapter {
 
     @GetMapping("/api/shop/member/login/{loginId}")
