@@ -6,7 +6,7 @@ spring:
     name: auth-service
 
   jwt:
-    secret: testSecretKey
+    secret: badfgkamsdgokmgweogsmaodgaoeirmgiofmdklhdfhhasfahdfvgohmeoagdfgmfomha
 
     token:
       access-expiration-time: 3600000
