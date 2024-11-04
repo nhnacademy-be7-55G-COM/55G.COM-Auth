@@ -65,7 +65,6 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request,
         HttpServletResponse response, FilterChain chain, Authentication authResult)
         throws IOException, ServletException {
-        //TODO 로그인 성공시 로직
         UserDetails user = (UserDetails) authResult.getPrincipal();
         String username = user.getUsername();
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
@@ -75,7 +74,9 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         String accessToken = jwtProvider.createAccessToken(username, role);
-        TokenResponseDto tokenResponseDto = new TokenResponseDto(accessToken);
+        String refreshToken = jwtProvider.createRefreshToken(username);
+
+        TokenResponseDto tokenResponseDto = new TokenResponseDto(accessToken, refreshToken);
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
