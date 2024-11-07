@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import shop.s5g.auth.dto.LoginResponseDto;
 
-@FeignClient(name = "member-service", url = "${gateway.url}")
+@FeignClient(value = "shop-service")
 public interface MemberAdapter {
 
     @GetMapping("/api/shop/member/login/{loginId}")
