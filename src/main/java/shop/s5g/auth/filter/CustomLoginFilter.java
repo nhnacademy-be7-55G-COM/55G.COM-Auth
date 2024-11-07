@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import org.apache.catalina.User;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,18 +19,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import shop.s5g.auth.dto.LoginRequestDto;
 import shop.s5g.auth.dto.TokenResponseDto;
 import shop.s5g.auth.exception.JsonConvertException;
-import shop.s5g.auth.jwt.JwtProvider;
+import shop.s5g.auth.jwt.JwtUtil;
+import shop.s5g.auth.repository.RefreshTokenRepository;
 
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final ObjectMapper objectMapper;
-    private final JwtProvider jwtProvider;
+    private final JwtUtil jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    public CustomLoginFilter(AuthenticationManager authenticationManager, JwtProvider jwtProvider) {
+    public CustomLoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
         this.authenticationManager = authenticationManager;
         this.objectMapper = new ObjectMapper();
-        this.jwtProvider = jwtProvider;
+        this.jwtUtil = jwtUtil;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     @Override
@@ -73,9 +76,10 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String accessToken = jwtProvider.createAccessToken(username, role);
-        String refreshToken = jwtProvider.createRefreshToken(username);
+        String accessToken = jwtUtil.createAccessToken(username, role);
+        String refreshToken = jwtUtil.createRefreshToken(username);
 
+        refreshTokenRepository.saveRefreshToken(username, refreshToken);
         TokenResponseDto tokenResponseDto = new TokenResponseDto(accessToken, refreshToken);
 
         response.setContentType("application/json");

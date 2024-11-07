@@ -10,13 +10,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JwtProvider {
+public class JwtUtil {
 
     private final long accessExpirationTime;
     private final long refreshExpirationTime;
     private final SecretKey secretKey;
 
-    public JwtProvider(@Value("${spring.jwt.secret}") String secretKey,
+    public JwtUtil(@Value("${spring.jwt.secret}") String secretKey,
         @Value("${spring.jwt.token.access-expiration-time}") long accessExpirationTime,
         @Value("${spring.jwt.token.refresh-expiration-time}") long refreshExpirationTime) {
         this.secretKey = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8),
@@ -27,7 +27,7 @@ public class JwtProvider {
 
     public String createAccessToken(String username, String role) {
         return Jwts.builder()
-            .claim("username", username)
+            .claim("loginId", username)
             .claim("role", role)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + accessExpirationTime))
@@ -37,10 +37,20 @@ public class JwtProvider {
 
     public String createRefreshToken(String username) {
         return Jwts.builder()
-            .claim("username", username)
+            .claim("loginId", username)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + refreshExpirationTime))
             .signWith(secretKey)
             .compact();
+    }
+
+    public String getUsername(String token){
+        return Jwts.parser()
+            .verifyWith(secretKey)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .get("loginId")
+            .toString();
     }
 }
