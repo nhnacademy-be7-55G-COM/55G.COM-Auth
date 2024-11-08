@@ -16,6 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import shop.s5g.auth.adapter.MemberAdapter;
 import shop.s5g.auth.dto.LoginRequestDto;
 import shop.s5g.auth.dto.TokenResponseDto;
 import shop.s5g.auth.exception.JsonConvertException;
@@ -28,12 +29,14 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final MemberAdapter memberAdapter;
 
-    public CustomLoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
+    public CustomLoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RefreshTokenRepository refreshTokenRepository, MemberAdapter memberAdapter) {
         this.authenticationManager = authenticationManager;
         this.objectMapper = new ObjectMapper();
         this.jwtUtil = jwtUtil;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.memberAdapter = memberAdapter;
     }
 
     @Override
@@ -78,6 +81,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String accessToken = jwtUtil.createAccessToken(username, role);
         String refreshToken = jwtUtil.createRefreshToken(username);
+
+        memberAdapter.updateLatestLoginAt(username);
 
         refreshTokenRepository.saveRefreshToken(username, refreshToken);
         TokenResponseDto tokenResponseDto = new TokenResponseDto(accessToken, refreshToken);

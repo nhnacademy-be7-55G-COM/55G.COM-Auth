@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import shop.s5g.auth.adapter.MemberAdapter;
 import shop.s5g.auth.filter.CustomLoginFilter;
 import shop.s5g.auth.filter.CustomLogoutFilter;
 import shop.s5g.auth.jwt.JwtUtil;
@@ -27,6 +28,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final MemberAdapter memberAdapter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -47,7 +49,7 @@ public class SecurityConfig {
             authorizeRequests.anyRequest().permitAll());
 
         CustomLoginFilter customLoginFilter = new CustomLoginFilter(
-            authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenRepository);
+            authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenRepository, memberAdapter);
 
         customLoginFilter.setFilterProcessesUrl("/api/auth/login");
 
