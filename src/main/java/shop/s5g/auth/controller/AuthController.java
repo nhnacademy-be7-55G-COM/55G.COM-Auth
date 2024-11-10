@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import shop.s5g.auth.dto.RoleResponseDto;
 import shop.s5g.auth.dto.TokenResponseDto;
 import shop.s5g.auth.dto.UserDetailResponseDto;
 import shop.s5g.auth.service.TokenService;
@@ -34,5 +35,16 @@ public class AuthController {
     public ResponseEntity<UserDetailResponseDto> getUserDetail(@PathVariable String uuid) {
 
         return ResponseEntity.ok().body(tokenService.getUserByUUID(uuid));
+    }
+
+    @GetMapping("/role")
+    public ResponseEntity<RoleResponseDto> getRole(@RequestHeader(name = "Authorization") String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().build();
+        }
+        String accessToken = authorizationHeader.substring(7);
+        String role = tokenService.getRoleByToken(accessToken);
+
+        return ResponseEntity.ok().body(new RoleResponseDto(role));
     }
 }

@@ -87,4 +87,14 @@ public class TokenService {
         String[] parts = value.split(":");
         return new UserDetailResponseDto(parts[0], parts[1]);
     }
+
+    public String getRoleByToken(String token){
+        String uuid = jwtUtil.getUUID(token);
+        if (!uuidRepository.existsUUID(uuid)) {
+            throw new InvalidResponseException("Invalid UUID");
+        }
+        String value = uuidRepository.getLoginIdAndRole(uuid);
+        String[] parts = value.split(":");
+        return parts[1];
+    }
 }
