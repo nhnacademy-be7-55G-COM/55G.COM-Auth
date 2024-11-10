@@ -9,20 +9,20 @@ import org.springframework.stereotype.Repository;
 public class RefreshTokenRepository {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final String refreshTokenKey = "refresh_token";
+    private static final String REFRESH_TOKEN = "refresh_token";
 
-    public boolean isExistRefreshToken(String loginId) {
-        return redisTemplate.opsForHash().hasKey(refreshTokenKey, loginId);
+    public boolean isExistRefreshToken(String uuid) {
+        return redisTemplate.opsForHash().hasKey(REFRESH_TOKEN, uuid);
     }
 
-    public void saveRefreshToken(String loginId, String refreshToken) {
-        redisTemplate.opsForHash().put(refreshTokenKey, loginId, refreshToken);
+    public void saveRefreshToken(String uuid, String refreshToken) {
+        redisTemplate.opsForHash().put(REFRESH_TOKEN, uuid, refreshToken);
     }
 
-    public String getRefreshToken(String loginId) {
-        return (String) redisTemplate.opsForHash().get(refreshTokenKey, loginId);
+    public String getRefreshToken(String uuid) {
+        return (String) redisTemplate.opsForHash().get(REFRESH_TOKEN, uuid);
     }
-    public void deleteRefreshToken(String loginId) {
-        redisTemplate.opsForHash().delete(refreshTokenKey, loginId);
+    public void deleteRefreshToken(String uuid) {
+        redisTemplate.opsForHash().delete(REFRESH_TOKEN, uuid);
     }
 }
