@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,17 +16,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import shop.s5g.auth.adapter.ShopUserAdapter;
 import shop.s5g.auth.dto.LoginRequestDto;
 import shop.s5g.auth.dto.TokenResponseDto;
 import shop.s5g.auth.exception.JsonConvertException;
-import shop.s5g.auth.repository.UUIDRepository;
 import shop.s5g.auth.service.TokenService;
 
 @RequiredArgsConstructor
-public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
+public class CustomAdminLoginFilter extends UsernamePasswordAuthenticationFilter {
 
-    private final AuthenticationManager memberAuthenticationManager;
+    private final AuthenticationManager adminAuthenticationManager;
     private final ObjectMapper objectMapper;
     private final TokenService tokenService;
 
@@ -48,8 +45,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
-        return memberAuthenticationManager.authenticate(authToken);
-
+        return adminAuthenticationManager.authenticate(authToken);
     }
 
     @Override

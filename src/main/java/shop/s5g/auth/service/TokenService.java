@@ -32,7 +32,7 @@ public class TokenService {
         String accessToken = jwtUtil.createAccessToken(uuid);
         String refreshToken = jwtUtil.createRefreshToken(uuid);
 
-        refreshTokenRepository.saveRefreshToken(uuid, refreshToken);
+        refreshTokenRepository.saveRefreshToken(username + ":" + role, refreshToken);
 
         if (role.equals("ROLE_MEMBER")){
             shopUserAdapter.updateLatestLoginAt(username);
@@ -41,34 +41,41 @@ public class TokenService {
         return new TokenResponseDto(accessToken, refreshToken);
     }
 
-//    public TokenResponseDto reissueToken(String refreshToken, String path) {
-//        String loginId = jwtUtil.getUsername(refreshToken);
-//
-//        if (!refreshTokenRepository.isExistRefreshToken(loginId)){
-//             throw new InvalidResponseException("Invalid refresh token");
-//        }
-//
-//        String validRefreshToken = refreshTokenRepository.getRefreshToken(loginId);
-//
-//        if (!validRefreshToken.equals(refreshToken)) {
-//            throw new InvalidResponseException("Invalid refresh token");
-//        }
-//
-//        refreshTokenRepository.deleteRefreshToken(loginId);
-//
-//        return issueToken(loginId,);
-//    }
+    public TokenResponseDto reissueToken(String refreshToken) {
+        String uuid= jwtUtil.getUUID(refreshToken);
+
+        if (!uuidRepository.existsUUID(uuid)){
+             throw new InvalidResponseException("Invalid refresh token");
+        }
+
+        String loginIdAndRole = uuidRepository.getLoginIdAndRole(uuid);
+
+        if (!refreshTokenRepository.isExistRefreshToken(loginIdAndRole)){
+            throw new InvalidResponseException("Invalid refresh token");
+        }
+
+        String validRefreshToken = refreshTokenRepository.getRefreshToken(loginIdAndRole);
+
+        if (!validRefreshToken.equals(refreshToken)) {
+            throw new InvalidResponseException("Invalid refresh token");
+        }
+        refreshTokenRepository.deleteRefreshToken(loginIdAndRole);
+
+        String[] parts = loginIdAndRole.split(":");
+        return issueToken(parts[0], parts[1]);
+    }
 
     public boolean deleteToken(String uuid) {
-        if (!refreshTokenRepository.isExistRefreshToken(uuid)){
-            return false;
-        }
         if (!uuidRepository.existsUUID(uuid)) {
             return false;
         }
+        String loginIdAndRole = uuidRepository.getLoginIdAndRole(uuid);
 
+        if (!refreshTokenRepository.isExistRefreshToken(loginIdAndRole)){
+            return false;
+        }
         uuidRepository.deleteUUID(uuid);
-        refreshTokenRepository.deleteRefreshToken(uuid);
+        refreshTokenRepository.deleteRefreshToken(loginIdAndRole);
         return true;
     }
 

@@ -11,18 +11,18 @@ public class RefreshTokenRepository {
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String REFRESH_TOKEN = "refresh_token";
 
-    public boolean isExistRefreshToken(String uuid) {
-        return redisTemplate.opsForHash().hasKey(REFRESH_TOKEN, uuid);
+    public boolean isExistRefreshToken(String loginIdAndRole) {
+        return redisTemplate.opsForHash().hasKey(REFRESH_TOKEN, loginIdAndRole);
     }
 
-    public void saveRefreshToken(String uuid, String refreshToken) {
-        redisTemplate.opsForHash().put(REFRESH_TOKEN, uuid, refreshToken);
+    public void saveRefreshToken(String loginIdAndRole, String refreshToken) {
+        redisTemplate.opsForHash().put(REFRESH_TOKEN, loginIdAndRole, refreshToken);
     }
 
-    public String getRefreshToken(String uuid) {
-        return (String) redisTemplate.opsForHash().get(REFRESH_TOKEN, uuid);
+    public String getRefreshToken(String loginIdAndRole) {
+        return (String) redisTemplate.opsForHash().get(REFRESH_TOKEN, loginIdAndRole);
     }
-    public void deleteRefreshToken(String uuid) {
-        redisTemplate.opsForHash().delete(REFRESH_TOKEN, uuid);
+    public void deleteRefreshToken(String loginIdAndRole) {
+        redisTemplate.opsForHash().delete(REFRESH_TOKEN, loginIdAndRole);
     }
 }

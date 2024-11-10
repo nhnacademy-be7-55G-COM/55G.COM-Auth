@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import shop.s5g.auth.filter.CustomAdminLoginFilter;
 import shop.s5g.auth.filter.CustomLoginFilter;
 import shop.s5g.auth.filter.CustomLogoutFilter;
 import shop.s5g.auth.jwt.JwtUtil;
@@ -54,11 +55,17 @@ public class SecurityConfig {
             authorizeRequests.anyRequest().permitAll());
 
         CustomLoginFilter customLoginFilter = new CustomLoginFilter(
-            memberAuthenticationManager(), adminAuthenticationManager(), objectMapper, tokenService);
+            memberAuthenticationManager(), objectMapper, tokenService);
 
+        CustomAdminLoginFilter customAdminLoginFilter = new CustomAdminLoginFilter(
+            adminAuthenticationManager(), objectMapper, tokenService);
+
+        customAdminLoginFilter.setFilterProcessesUrl("/api/auth/admin/login");
         customLoginFilter.setFilterProcessesUrl("/api/auth/login");
 
-        http.addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(customAdminLoginFilter, UsernamePasswordAuthenticationFilter.class);
+
         http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenService), LogoutFilter.class);
         return http.build();
     }
