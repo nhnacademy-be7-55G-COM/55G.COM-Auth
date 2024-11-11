@@ -8,16 +8,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.filter.GenericFilterBean;
 import shop.s5g.auth.jwt.JwtUtil;
-import shop.s5g.auth.repository.RefreshTokenRepository;
+import shop.s5g.auth.service.TokenService;
 
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JwtUtil jwtUtil;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenService tokenService;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
@@ -27,8 +26,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String requestUri = request.getRequestURI();
-        if (!requestUri.matches("/api/auth/logout")) {
-
+        if (!requestUri.matches("/api/auth/logout") && !requestUri.matches("/api/auth/admin/logout")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -45,13 +43,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         String refreshToken = authorizationHeader.substring(7);
-        String loginId = jwtUtil.getUsername(refreshToken);
-        if(!refreshTokenRepository.isExistRefreshToken(loginId)){
+        String uuid = jwtUtil.getUUID(refreshToken);
+
+        if(!tokenService.deleteToken(uuid)){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        refreshTokenRepository.deleteRefreshToken(refreshToken);
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }

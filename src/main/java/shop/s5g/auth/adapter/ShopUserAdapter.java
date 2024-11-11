@@ -8,10 +8,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import shop.s5g.auth.dto.LoginResponseDto;
 
 @FeignClient(value = "shop-service")
-public interface MemberAdapter {
+public interface ShopUserAdapter {
 
     @GetMapping("/api/shop/member/login/{loginId}")
     ResponseEntity<LoginResponseDto> getUserInfo(@PathVariable String loginId);
+
+    @GetMapping("/api/shop/admin/login/{loginId}")
+    ResponseEntity<LoginResponseDto> getAdminInfo(@PathVariable String loginId);
 
     @PutMapping("/api/shop/member/{loginId}")
     ResponseEntity<Void> updateLatestLoginAt(@PathVariable String loginId);

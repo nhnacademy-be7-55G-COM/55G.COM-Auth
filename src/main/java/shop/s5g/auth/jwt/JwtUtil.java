@@ -25,32 +25,31 @@ public class JwtUtil {
         this.refreshExpirationTime = refreshExpirationTime;
     }
 
-    public String createAccessToken(String username, String role) {
+    public String createAccessToken(String uuid) {
         return Jwts.builder()
-            .claim("loginId", username)
-            .claim("role", role)
+            .claim("id", uuid)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + accessExpirationTime))
             .signWith(secretKey)
             .compact();
     }
 
-    public String createRefreshToken(String username) {
+    public String createRefreshToken(String uuid) {
         return Jwts.builder()
-            .claim("loginId", username)
+            .claim("id", uuid)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + refreshExpirationTime))
             .signWith(secretKey)
             .compact();
     }
 
-    public String getUsername(String token){
+    public String getUUID(String token){
         return Jwts.parser()
             .verifyWith(secretKey)
             .build()
             .parseSignedClaims(token)
             .getPayload()
-            .get("loginId")
+            .get("id")
             .toString();
     }
 }

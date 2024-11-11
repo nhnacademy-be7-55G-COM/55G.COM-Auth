@@ -1,11 +1,14 @@
 package shop.s5g.auth.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,21 +17,24 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import shop.s5g.auth.adapter.MemberAdapter;
+import shop.s5g.auth.filter.CustomAdminLoginFilter;
 import shop.s5g.auth.filter.CustomLoginFilter;
 import shop.s5g.auth.filter.CustomLogoutFilter;
 import shop.s5g.auth.jwt.JwtUtil;
-import shop.s5g.auth.repository.RefreshTokenRepository;
+import shop.s5g.auth.service.CustomAdminDetailService;
+import shop.s5g.auth.service.CustomUserDetailService;
+import shop.s5g.auth.service.TokenService;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
+    private final ObjectMapper objectMapper;
+    private final CustomAdminDetailService customAdminDetailService;
+    private final CustomUserDetailService customUserDetailService;
+    private final TokenService tokenService;
     private final JwtUtil jwtUtil;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final MemberAdapter memberAdapter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,19 +55,19 @@ public class SecurityConfig {
             authorizeRequests.anyRequest().permitAll());
 
         CustomLoginFilter customLoginFilter = new CustomLoginFilter(
-            authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenRepository, memberAdapter);
+            memberAuthenticationManager(), objectMapper, tokenService);
 
+        CustomAdminLoginFilter customAdminLoginFilter = new CustomAdminLoginFilter(
+            adminAuthenticationManager(), objectMapper, tokenService);
+
+        customAdminLoginFilter.setFilterProcessesUrl("/api/auth/admin/login");
         customLoginFilter.setFilterProcessesUrl("/api/auth/login");
 
-        http.addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshTokenRepository), LogoutFilter.class);
-        return http.build();
-    }
+        http.addFilterBefore(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(customAdminLoginFilter, UsernamePasswordAuthenticationFilter.class);
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
-        throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, tokenService), LogoutFilter.class);
+        return http.build();
     }
 
     @Bean
@@ -69,4 +75,31 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    @Primary
+    public DaoAuthenticationProvider memberAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailService);
+        provider.setPasswordEncoder(bCryptPasswordEncoder());
+        return provider;
+    }
+
+    @Bean
+    public DaoAuthenticationProvider adminAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customAdminDetailService);
+        provider.setPasswordEncoder(bCryptPasswordEncoder());
+        return provider;
+    }
+
+    @Bean
+    @Primary
+    public AuthenticationManager memberAuthenticationManager() {
+        return new ProviderManager(Collections.singletonList(memberAuthenticationProvider()));
+    }
+
+    @Bean
+    public AuthenticationManager adminAuthenticationManager() {
+        return new ProviderManager(Collections.singletonList(adminAuthenticationProvider()));
+    }
 }
