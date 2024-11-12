@@ -126,7 +126,7 @@ class TokenServiceTest {
 
         // Verify that methods are called
         verify(jwtUtil, times(1)).getUUID(invalidRefreshToken);
-        verify(uuidRepository, times(1)).existsUUID("invalidUUID");
+        verify(uuidRepository, times(2)).existsUUID("invalidUUID");
     }
 
     @Test
