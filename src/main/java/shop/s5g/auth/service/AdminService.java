@@ -21,9 +21,9 @@ public class AdminService {
     private final ShopUserAdapter shopUserAdapter;
 
     public UserDetails getAdmin(String loginId){
-        ResponseEntity<LoginResponseDto> response = shopUserAdapter.getAdminInfo(loginId);
-
         try{
+            ResponseEntity<LoginResponseDto> response = shopUserAdapter.getAdminInfo(loginId);
+
             if (response.getStatusCode().is2xxSuccessful()){
                 LoginResponseDto responseDto = response.getBody();
                 if (responseDto == null){

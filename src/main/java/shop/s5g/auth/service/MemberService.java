@@ -21,9 +21,9 @@ public class MemberService {
     private final ShopUserAdapter shopUserAdapter;
 
     public UserDetails getMember(String loginId){
-        ResponseEntity<LoginResponseDto> response = shopUserAdapter.getUserInfo(loginId);
-
         try{
+            ResponseEntity<LoginResponseDto> response = shopUserAdapter.getUserInfo(loginId);
+
             if (response.getStatusCode().is2xxSuccessful()){
                 LoginResponseDto responseDto = response.getBody();
                 if (responseDto == null){
