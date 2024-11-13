@@ -29,8 +29,10 @@ gateway:
   url: http://localhost:8000
 
 redis:
-  host: localhost
-  port: 6379
+  host: host
+  port: port
+  password: password
+
 ---
 spring:
   config:
@@ -46,12 +48,3 @@ spring:
       on-profile: dev
 
     import: optional:configserver:http://55g-config-dev:9050
----
-spring:
-  config:
-    activate:
-      on-profile: docker
-
-redis:
-  host: redis-dev
-  port: 6379
