@@ -30,7 +30,7 @@ gateway:
 
 redis:
   host: host
-  port: port
+  port: 0
   password: password
 
 ---
