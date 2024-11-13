@@ -21,7 +21,7 @@ spring:
 
   rabbitmq:
     host: host
-    port: 0
+    port: 1
     username: username
     password: password
 
