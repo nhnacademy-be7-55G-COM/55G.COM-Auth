@@ -9,8 +9,8 @@ spring:
     secret: badfgkamsdgokmgweogsmaodgaoeirmgiofmdklhdfhhasfahdfvgohmeoagdfgmfomha
 
     token:
-      access-expiration-time: 3600000
-      refresh-expiration-time: 86400000
+      access-expiration-time: 600000
+      refresh-expiration-time: 1200000
 
   config:
     import: optional:configserver:http://localhost:9000

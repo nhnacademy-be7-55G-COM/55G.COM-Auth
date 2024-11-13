@@ -17,11 +17,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import shop.s5g.auth.adapter.ShopUserAdapter;
 import shop.s5g.auth.dto.LoginRequestDto;
 import shop.s5g.auth.dto.TokenResponseDto;
 import shop.s5g.auth.exception.JsonConvertException;
-import shop.s5g.auth.repository.UUIDRepository;
 import shop.s5g.auth.service.TokenService;
 
 @RequiredArgsConstructor
