@@ -19,6 +19,12 @@ spring:
     config:
       label: main
 
+  rabbitmq:
+    host: host
+    port: 0
+    username: username
+    password: password
+
 gateway:
   url: http://localhost:8000
 
