@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +31,12 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
         HttpServletResponse response) throws AuthenticationException {
+        return getAuthentication(request, objectMapper, memberAuthenticationManager);
+
+    }
+
+    static Authentication getAuthentication(HttpServletRequest request, ObjectMapper objectMapper,
+        AuthenticationManager memberAuthenticationManager) {
         LoginRequestDto loginRequestDto = null;
 
         try {
@@ -47,15 +52,6 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
 
         return memberAuthenticationManager.authenticate(authToken);
-
-    }
-
-    @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request,
-        HttpServletResponse response, AuthenticationException failed)
-        throws IOException, ServletException {
-        //TODO 로그인 실패시 로직
-        super.unsuccessfulAuthentication(request, response, failed);
     }
 
     @Override
@@ -63,6 +59,11 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         HttpServletResponse response, FilterChain chain, Authentication authResult)
         throws IOException, ServletException {
 
+        executeSuccessLogin(response, authResult, tokenService, objectMapper);
+    }
+
+    static void executeSuccessLogin(HttpServletResponse response, Authentication authResult,
+        TokenService tokenService, ObjectMapper objectMapper) throws IOException {
         UserDetails user = (UserDetails) authResult.getPrincipal();
         String username = user.getUsername();
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();

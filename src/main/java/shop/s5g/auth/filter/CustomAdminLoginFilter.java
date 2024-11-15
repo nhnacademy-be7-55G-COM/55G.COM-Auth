@@ -6,19 +6,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import shop.s5g.auth.dto.LoginRequestDto;
-import shop.s5g.auth.dto.TokenResponseDto;
-import shop.s5g.auth.exception.JsonConvertException;
 import shop.s5g.auth.service.TokenService;
 
 @RequiredArgsConstructor
@@ -31,29 +23,7 @@ public class CustomAdminLoginFilter extends UsernamePasswordAuthenticationFilter
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
         HttpServletResponse response) throws AuthenticationException {
-        LoginRequestDto loginRequestDto = null;
-
-        try {
-            loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
-
-        } catch (IOException e) {
-            throw new JsonConvertException("Failed to convert JSON to LoginRequestDto");
-        }
-
-        String username = loginRequestDto.loginId();
-        String password = loginRequestDto.password();
-
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
-
-        return adminAuthenticationManager.authenticate(authToken);
-    }
-
-    @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request,
-        HttpServletResponse response, AuthenticationException failed)
-        throws IOException, ServletException {
-        //TODO 로그인 실패시 로직
-        super.unsuccessfulAuthentication(request, response, failed);
+        return CustomLoginFilter.getAuthentication(request, objectMapper, adminAuthenticationManager);
     }
 
     @Override
@@ -61,18 +31,6 @@ public class CustomAdminLoginFilter extends UsernamePasswordAuthenticationFilter
         HttpServletResponse response, FilterChain chain, Authentication authResult)
         throws IOException, ServletException {
 
-        UserDetails user = (UserDetails) authResult.getPrincipal();
-        String username = user.getUsername();
-        Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next();
-
-        String role = auth.getAuthority();
-
-        TokenResponseDto tokenResponseDto = tokenService.issueToken(username, role);
-
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-        objectMapper.writeValue(response.getOutputStream(), tokenResponseDto);
+        CustomLoginFilter.executeSuccessLogin(response, authResult, tokenService, objectMapper);
     }
 }
