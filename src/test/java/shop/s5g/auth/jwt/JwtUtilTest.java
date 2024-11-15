@@ -64,13 +64,11 @@ class JwtUtilTest {
     }
 
     @Test
-    void testGetUUIDWithExpiredToken() throws InterruptedException {
-        JwtUtil shortLivedJwtUtil = new JwtUtil(secretKey, 10, 10); // 10ms 만료 시간
+    void testGetUUIDWithExpiredToken() {
+        JwtUtil shortLivedJwtUtil = new JwtUtil(secretKey, -10, -10); // 10ms 만료 시간
 
         String uuid = "test-uuid";
         String accessToken = shortLivedJwtUtil.createAccessToken(uuid);
-
-        Thread.sleep(20);
 
         assertThrows(JwtException.class, () -> shortLivedJwtUtil.getUUID(accessToken), "Should throw JwtException for expired token");
     }

@@ -44,23 +44,25 @@ public class TokenService {
     public TokenResponseDto reissueToken(String refreshToken) {
         String uuid= jwtUtil.getUUID(refreshToken);
 
+        String message = "Invalid refresh token";
+
         if (!uuidRepository.existsUUID(uuid)){
             deleteToken(uuid);
-            throw new InvalidResponseException("Invalid refresh token");
+            throw new InvalidResponseException(message);
         }
 
         String loginIdAndRole = uuidRepository.getLoginIdAndRole(uuid);
 
         if (!refreshTokenRepository.isExistRefreshToken(loginIdAndRole)){
             deleteToken(uuid);
-            throw new InvalidResponseException("Invalid refresh token");
+            throw new InvalidResponseException(message);
         }
 
         String validRefreshToken = refreshTokenRepository.getRefreshToken(loginIdAndRole);
 
         if (!validRefreshToken.equals(refreshToken)) {
             deleteToken(uuid);
-            throw new InvalidResponseException("Invalid refresh token");
+            throw new InvalidResponseException(message);
         }
         uuidRepository.deleteUUID(uuid);
         refreshTokenRepository.deleteRefreshToken(loginIdAndRole);
