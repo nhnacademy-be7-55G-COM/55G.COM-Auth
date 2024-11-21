@@ -51,7 +51,6 @@ docker run -d --name $container_name \
   --network $network_bridge \
   --env SPRING_PROFILE=$spring_env \
   --env SERVER_PORT=$server_port \
-  --memory="256m" --memory-swap="356m" \
   -p $server_port:$server_port \
   -v /logs:/logs \
   -v /var/55g/static:/static \
