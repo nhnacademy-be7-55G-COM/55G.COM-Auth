@@ -33,6 +33,13 @@ redis:
   port: 1
   password: password
 
+oauth:
+  payco:
+    token-url: https://id.payco.com/oauth2.0/token
+    client-id: 3RDZzEkOENyj7mThJCsfZ1i
+    client-secret: LrXcjbS9aDzFvnljuZwTxKKL
+    member-info-url: https://apis-payco.krp.toastoven.net/payco/friends/find_member_v2.json
+
 ---
 spring:
   config:
