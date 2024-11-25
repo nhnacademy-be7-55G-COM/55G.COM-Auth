@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,10 +18,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import shop.s5g.auth.dto.LoginRequestDto;
+import shop.s5g.auth.dto.MessageDto;
 import shop.s5g.auth.dto.TokenResponseDto;
 import shop.s5g.auth.exception.JsonConvertException;
 import shop.s5g.auth.service.TokenService;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -60,6 +63,20 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         throws IOException, ServletException {
 
         executeSuccessLogin(response, authResult, tokenService, objectMapper);
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+        HttpServletResponse response, AuthenticationException failed)
+        throws IOException, ServletException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=utf-8");
+
+        MessageDto messageDto = new MessageDto("로그인이 실패했습니다");
+        String resp = objectMapper.writeValueAsString(messageDto);
+        log.warn("Login failed. Response: {}", resp);
+        response.getWriter().write(resp);
+//        objectMapper.writeValue(response.getOutputStream(), messageDto);
     }
 
     static void executeSuccessLogin(HttpServletResponse response, Authentication authResult,
