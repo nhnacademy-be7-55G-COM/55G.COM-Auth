@@ -2,7 +2,6 @@ package shop.s5g.auth.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -107,12 +106,15 @@ class UUIDRepositoryTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 UUID 조회 시 NullPointerException 발생")
+    @DisplayName("존재하지 않는 UUID 조회 시 Null 반환")
     void getNonExistentUUID() {
         // Given
         String uuid = "non-existent-uuid";
 
-        // When & Then
-        assertThrows(NullPointerException.class, () -> uuidRepository.getLoginIdAndRole(uuid));
+        // When
+        String result = uuidRepository.getLoginIdAndRole(uuid);
+
+        // Then
+        assertNull(result, "존재하지 않는 UUID를 조회할 경우 null이어야 합니다.");
     }
 }
