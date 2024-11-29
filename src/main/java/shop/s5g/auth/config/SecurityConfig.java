@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import shop.s5g.auth.adapter.ShopUserAdapter;
 import shop.s5g.auth.filter.CustomAdminLoginFilter;
 import shop.s5g.auth.filter.CustomLoginFilter;
 import shop.s5g.auth.filter.CustomLogoutFilter;
@@ -31,6 +32,7 @@ import shop.s5g.auth.service.TokenService;
 public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
+    private final ShopUserAdapter shopUserAdapter;
     private final CustomAdminDetailService customAdminDetailService;
     private final CustomUserDetailService customUserDetailService;
     private final TokenService tokenService;
@@ -55,7 +57,7 @@ public class SecurityConfig {
             authorizeRequests.anyRequest().permitAll());
 
         CustomLoginFilter customLoginFilter = new CustomLoginFilter(
-            memberAuthenticationManager(), objectMapper, tokenService);
+            memberAuthenticationManager(), objectMapper, tokenService, shopUserAdapter);
 
         CustomAdminLoginFilter customAdminLoginFilter = new CustomAdminLoginFilter(
             adminAuthenticationManager(), objectMapper, tokenService);
