@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +25,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import shop.s5g.auth.adapter.ShopUserAdapter;
 import shop.s5g.auth.dto.LoginRequestDto;
+import shop.s5g.auth.dto.MemberStatusResponseDto;
 import shop.s5g.auth.dto.TokenResponseDto;
 import shop.s5g.auth.exception.JsonConvertException;
 import shop.s5g.auth.service.TokenService;
@@ -52,10 +55,13 @@ class CustomLoginFilterTest {
 
     private ObjectMapper objectMapper;
 
+    @Mock
+    private ShopUserAdapter shopUserAdapter;
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        customLoginFilter = new CustomLoginFilter(authenticationManager, objectMapper, tokenService);
+        customLoginFilter = new CustomLoginFilter(authenticationManager, objectMapper, tokenService, shopUserAdapter);
     }
 
     @Test
@@ -109,6 +115,8 @@ class CustomLoginFilterTest {
         TokenResponseDto tokenResponseDto = new TokenResponseDto("accessToken", "refreshToken");
         when(tokenService.issueToken("testUser", "ROLE_USER")).thenReturn(tokenResponseDto);
 
+        MemberStatusResponseDto statusResponseDto = new MemberStatusResponseDto(1L, "ACTIVE");
+        when(shopUserAdapter.getMemberStatus("testUser")).thenReturn(ResponseEntity.ok().body(statusResponseDto));
         // Call Method
         customLoginFilter.successfulAuthentication(
             new MockHttpServletRequest(), response, filterChain, authResult);

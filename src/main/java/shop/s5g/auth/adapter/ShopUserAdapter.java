@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import shop.s5g.auth.dto.LoginResponseDto;
 import shop.s5g.auth.dto.MemberLoginIdResponseDto;
+import shop.s5g.auth.dto.MemberStatusResponseDto;
 import shop.s5g.auth.dto.MessageDto;
 
 @FeignClient(value = "shop-service")
@@ -32,4 +33,8 @@ public interface ShopUserAdapter {
     @PostMapping("/api/shop/member/payco/link")
     ResponseEntity<MessageDto> linkAccount(@RequestParam(name = "payco_id") String paycoId,
         @RequestHeader(name = HttpHeaders.AUTHORIZATION) String accessToken);
+
+
+    @GetMapping("/api/shop/member/{login-id}/status")
+    ResponseEntity<MemberStatusResponseDto> getMemberStatus(@PathVariable(name = "login-id") String loginId);
 }

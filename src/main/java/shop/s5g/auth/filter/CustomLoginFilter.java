@@ -8,8 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +19,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import shop.s5g.auth.adapter.ShopUserAdapter;
 import shop.s5g.auth.dto.LoginRequestDto;
+import shop.s5g.auth.dto.MemberStatusResponseDto;
 import shop.s5g.auth.dto.MessageDto;
 import shop.s5g.auth.dto.TokenResponseDto;
 import shop.s5g.auth.exception.JsonConvertException;
@@ -30,6 +34,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager memberAuthenticationManager;
     private final ObjectMapper objectMapper;
     private final TokenService tokenService;
+    private final ShopUserAdapter shopUserAdapter;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -61,6 +66,17 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request,
         HttpServletResponse response, FilterChain chain, Authentication authResult)
         throws IOException, ServletException {
+        UserDetails user = (UserDetails) authResult.getPrincipal();
+        ResponseEntity<MemberStatusResponseDto> status = shopUserAdapter.getMemberStatus(user.getUsername());
+
+        if (Objects.requireNonNull(status.getBody()).typeName().equals("INACTIVE")){
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json;charset=utf-8");
+
+            MessageDto messageDto = new MessageDto(user.getUsername());
+            objectMapper.writeValue(response.getOutputStream(), messageDto);
+            return;
+        }
 
         executeSuccessLogin(response, authResult, tokenService, objectMapper);
     }
